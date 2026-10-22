@@ -1,0 +1,651 @@
+/* Paleta azul-marinho, turquesa e verde-menta */
+:root {
+    --bg: #0A0A18;
+    --panel: #1A1A35;
+    --panel-dark: #0A0A18;
+    --line: #05D9E8;
+    --pink: #FF2A6D;
+    --pink-dark: #C2185B;
+    --teal: #05D9E8;
+    --gold: #FCEE0A;
+}
+
+/* Reset e Estilos Globais */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--bg);
+    font-family: 'Poppins', 'Segoe UI', Tahoma, sans-serif;
+    color: #EAEAF2;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+    user-select: none;
+}
+
+.game-container {
+    width: 100%;
+    max-width: 900px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Barra Superior (HUD) */
+.hud-bar {
+    width: 100%;
+    background: linear-gradient(180deg, #1A1A35 0%, #0A0A18 100%);
+    border: 3px solid var(--teal);
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.player-info, .score-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.label {
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 1px;
+}
+
+.value {
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 14px;
+    color: #EAEAF2;
+    text-shadow: 2px 2px #000;
+}
+
+/* Tabuleiro do Jogo: cidade à noite */
+.game-board {
+    width: 100%;
+    height: 480px;
+    border-left: 4px solid #1A1A35;
+    border-right: 4px solid #1A1A35;
+    border-bottom: 20px solid #1A1A35;
+    border-radius: 0 0 12px 12px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+    background: #05D9E8 url('../assets/cenario-pikachu.jpg') center bottom / cover no-repeat;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+}
+
+/* Linha de neon no chão */
+.game-board::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: var(--teal);
+    box-shadow: 0 0 12px var(--teal);
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* Camadas do cenário */
+.sky-stars {
+    position: absolute;
+    inset: 0 0 40% 0;
+    display: none;
+}
+
+.moon {
+    display: none;
+}
+
+.city {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-repeat: repeat-x;
+    background-position: 0 100%;
+    animation-play-state: paused;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+.city-far {
+    display: none;
+    height: 230px;
+    background-image: url('../assets/city-far.svg');
+    background-size: 900px 230px;
+    animation-name: city-far-scroll;
+    animation-duration: 40s;
+}
+
+.city-near {
+    display: none;
+    height: 170px;
+    background-image: url('../assets/city-near.svg');
+    background-size: 900px 170px;
+    animation-name: city-near-scroll;
+    animation-duration: 12s;
+}
+
+/* Elementos do Jogo */
+.pipe {
+    position: absolute;
+    bottom: 0;
+    height: 80px;
+    width: auto;
+    right: -150px;
+    z-index: 8;
+}
+
+.hero {
+    width: 105px;
+    height: auto;
+    object-fit: contain;
+    position: absolute;
+    bottom: 0;
+    left: 20px;
+    z-index: 10;
+}
+
+/* Dica de pulo na tela */
+.jump-tip {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.85);
+    text-shadow: 1px 1px 3px #000;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 11;
+    white-space: nowrap;
+}
+
+/* Animações ativas durante o jogo */
+.game-board.running .pipe {
+    animation: pipe-animation 1.6s infinite linear;
+}
+
+.game-board.running .city {
+    animation-play-state: running;
+}
+
+.jump {
+    animation: jump-animation 500ms ease-out;
+}
+
+@keyframes pipe-animation {
+    from {
+        right: -150px;
+    }
+    to {
+        right: 100%;
+    }
+}
+
+@keyframes jump-animation {
+    0% {
+        bottom: 0;
+    }
+    40% {
+        bottom: 180px;
+    }
+    50% {
+        bottom: 180px;
+    }
+    100% {
+        bottom: 0;
+    }
+}
+
+@keyframes city-far-scroll {
+    from { background-position-x: 0; }
+    to   { background-position-x: -900px; }
+}
+
+@keyframes city-near-scroll {
+    from { background-position-x: 0; }
+    to   { background-position-x: -900px; }
+}
+
+/* Modais / Telas Sobrepostas */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(8, 10, 24, 0.88);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.modal-overlay.active {
+    display: flex;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.modal-card {
+    background: #1A1A35;
+    border: 4px solid var(--pink);
+    border-radius: 16px;
+    padding: 30px;
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(255, 61, 139, 0.4), 0 15px 40px rgba(0, 0, 0, 0.7);
+    margin: auto;
+}
+
+.start-card {
+    max-width: 540px;
+}
+
+.modal-header {
+    margin-bottom: 25px;
+}
+
+.game-title {
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    color: var(--gold);
+    font-size: 20px;
+    line-height: 1.5;
+    text-shadow: 3px 3px var(--pink), 6px 6px #000000;
+    margin-bottom: 12px;
+}
+
+.game-subtitle {
+    font-size: 13px;
+    color: #EAEAF2;
+}
+
+/* Formulário de Início */
+.start-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.input-group label,
+.field-label {
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 11px;
+    color: #EAEAF2;
+}
+
+.input-group input[type="text"] {
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 8px;
+    border: 2px solid var(--line);
+    background: var(--panel-dark);
+    color: #EAEAF2;
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    outline: none;
+    transition: all 0.25s;
+}
+
+.input-group input[type="text"]:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 10px rgba(255, 210, 63, 0.3);
+}
+
+/* Seleção de personagem */
+.character-select {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    width: 100%;
+}
+
+.character-card {
+    position: relative;
+    display: block;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.character-card input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+    padding: 8px 4px 8px;
+    border-radius: 10px;
+    border: 2px solid var(--line);
+    background: var(--panel-dark);
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.card-body img {
+    width: 100%;
+    max-width: 72px;
+    height: 72px;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+.card-name {
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #EAEAF2;
+    text-align: center;
+}
+
+.character-card:hover .card-body {
+    border-color: #1A1A35;
+}
+
+.character-card input:checked + .card-body {
+    border-color: var(--teal);
+    background: #1A1A35;
+    box-shadow: 0 0 12px rgba(25, 227, 208, 0.45);
+}
+
+.character-card input:checked + .card-body .card-name {
+    color: #EAEAF2;
+}
+
+.character-card input:focus-visible + .card-body {
+    outline: 3px solid var(--gold);
+    outline-offset: 2px;
+}
+
+/* Botões */
+.modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.btn {
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 12px;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+}
+
+.btn-primary {
+    background: linear-gradient(180deg, var(--pink) 0%, var(--pink-dark) 100%);
+    color: #EAEAF2;
+    border-bottom: 4px solid #1A1A35;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(180deg, #05D9E8 0%, #05D9E8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(255, 61, 139, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(2px);
+    border-bottom: 2px solid #1A1A35;
+}
+
+.btn-secondary {
+    background: #1A1A35;
+    color: #EAEAF2;
+    border-bottom: 4px solid #1A1A35;
+}
+
+.btn-secondary:hover {
+    background: #1A1A35;
+    color: #EAEAF2;
+}
+
+.btn:focus-visible {
+    outline: 3px solid var(--gold);
+    outline-offset: 2px;
+}
+
+/* Status do Laragon */
+.server-status {
+    margin-top: 20px;
+    font-size: 11px;
+    color: #EAEAF2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    display: inline-block;
+}
+
+.status-dot.online {
+    background: #05D9E8;
+    box-shadow: 0 0 8px #05D9E8;
+}
+
+.status-dot.offline {
+    background: #05D9E8;
+    box-shadow: 0 0 8px #05D9E8;
+}
+
+/* Tela de Game Over & Ranking */
+.gameover-card {
+    max-width: 540px;
+}
+
+.gameover-title {
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    color: var(--pink);
+    font-size: 26px;
+    text-shadow: 3px 3px #000;
+    margin-bottom: 10px;
+}
+
+.final-score-box {
+    background: #0A0A18;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #1A1A35;
+}
+
+.final-score-label {
+    font-size: 12px;
+    color: #EAEAF2;
+    margin-bottom: 4px;
+}
+
+.final-score-num {
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 24px;
+    color: var(--gold);
+    text-shadow: 2px 2px #000;
+}
+
+/* Tabela de Ranking */
+.ranking-container {
+    margin-bottom: 20px;
+}
+
+.ranking-title {
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--gold);
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+}
+
+.table-wrapper {
+    max-height: 220px;
+    overflow-y: auto;
+    border-radius: 8px;
+    background: var(--panel-dark);
+    border: 1px solid #1A1A35;
+}
+
+.table-wrapper::-webkit-scrollbar {
+    width: 6px;
+}
+.table-wrapper::-webkit-scrollbar-thumb {
+    background: var(--line);
+    border-radius: 4px;
+}
+
+.ranking-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+}
+
+.ranking-table th {
+    background: #1A1A35;
+    color: var(--gold);
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 9px;
+    padding: 10px 14px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.ranking-table td {
+    padding: 8px 14px;
+    border-bottom: 1px solid #0A0A18;
+}
+
+.ranking-table tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.ranking-table tr.highlight-current {
+    background: rgba(255, 210, 63, 0.15) !important;
+    font-weight: 700;
+    color: var(--gold);
+}
+
+.ranking-pos {
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 10px;
+    width: 70px;
+    white-space: nowrap;
+}
+
+.loading-cell {
+    text-align: center;
+    padding: 20px !important;
+    color: #EAEAF2;
+}
+
+.save-status {
+    margin-top: 8px;
+    font-size: 11px;
+    color: #05D9E8;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Responsividade */
+@media (max-width: 600px) {
+    .game-board {
+        height: 380px;
+    }
+    .hero {
+        width: 100px;
+    }
+    .pipe {
+        height: 64px;
+    }
+    .moon {
+        width: 100px;
+        right: 30px;
+    }
+    .hud-bar {
+        padding: 10px 14px;
+    }
+    .label {
+        font-size: 9px;
+    }
+    .value {
+        font-size: 11px;
+    }
+    .game-title {
+        font-size: 16px;
+    }
+    .btn {
+        font-size: 10px;
+        padding: 12px 14px;
+    }
+    .modal-card {
+        padding: 22px 16px;
+    }
+    .character-select {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Respeita quem prefere menos movimento: o cenário fica parado */
+@media (prefers-reduced-motion: reduce) {
+    .game-board.running .city {
+        animation-play-state: paused;
+    }
+}
